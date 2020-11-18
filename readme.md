@@ -30,7 +30,6 @@ jobs:
 
   reinvite:
     needs: report
-
     runs-on: ubuntu-latest
 
     steps:
@@ -76,7 +75,6 @@ jobs:
 
   reinvite:
     needs: report
-
     runs-on: ubuntu-latest
 
     steps:

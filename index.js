@@ -1,10 +1,11 @@
 /**
- * Invitations Report Action.
+ * Reinvitation Action.
  */
+const fs = require('fs').promises
+const path = require('path')
+
 const {getInput, info, setFailed, warning} = require('@actions/core')
 const github = require('@actions/github')
-
-const fs = require('fs').promises
 const parse = require('csv-parse/lib/sync')
 
 const normalizeColumns = column => {
@@ -40,13 +41,20 @@ const normalizeRecords = (value, context) => {
 }
 
 ;(async () => {
-  const token = getInput('token', {required: true})
-  const octokit = new github.getOctokit(token)
-
-  const path = getInput('report-path', {required: true})
-
   try {
-    const content = await fs.readFile(path)
+    const reportPath = getInput('report-path', {required: true})
+
+    const filePath = path.join(process.env.GITHUB_WORKSPACE, reportPath)
+    const {dir} = path.parse(filePath)
+
+    if (dir.indexOf(process.env.GITHUB_WORKSPACE) < 0) {
+      throw new Error(`${reportPath} is not an allowed path`)
+    }
+
+    const token = getInput('token', {required: true})
+    const octokit = new github.getOctokit(token)
+
+    const content = await fs.readFile(reportPath)
 
     const records = parse(content, {
       columns: header => header.map(normalizeColumns),
